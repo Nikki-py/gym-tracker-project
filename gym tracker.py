@@ -2,8 +2,25 @@
 
 # functions - create workout, save workout template
 # workout - exercise, weight, reps
+import json
+import os
+from datetime import date
+
+file = "gym_data.json"
+
+
 workouts = {}
 x=0
+
+def load():
+    if os.path.exists(file):
+        with open(file, "r") as f:
+            return json.load(f)
+    return {"templates": {}, "personal_records": {}, "history": []}
+
+def save(data):
+    with open(file, "w") as f:
+        json.dump(data, f, indent=4)
 
 def personal_records():
     global w
@@ -13,11 +30,12 @@ def personal_records():
     h = float(input("Height (in m): "))
     age = int(input("Age: "))
     gender = input("Gender: ")
+    data = load()
 
-    personal_record=[name, w, h, age, gender]
-    return personal_record
+    data["profile"]={"Name":name,"Weight":w, "Height":h, "Age":age, "Gender":gender}
+    save(data)
 
-def new_workout ():
+def new_workout (name):
     print("enter exercises")
     a = input("add exercise / finish: ")
     workout=[]
@@ -29,56 +47,89 @@ def new_workout ():
         a = input("add exercise / finish: ")
         workout.append([exercise, weight, reps])
         volume = volume + (weight*reps)
-    
-    while x!=10:
-        workouts[x]=[workout]
+        return volume;
+    data = load()
+    sesh = { "date": str(date.today()), "name":name, "total volume": volume, "exercises": workout}
+    data["history"].append(sesh)
+    save(data)
+    print("workout saved. total volume ", volume, "kg")
 
+def bmi_cal():
+    data = load()
+    profile = data.get("profile")
 
-def bmi_cal(w, h):
+    if not profile:
+        print("set up profile first")
+        return
+    w = profile["weight"]
+    h = profile["height"]
     bmi = w/(h**2)
     print("BMI is: ", bmi)
     return bmi
 
 w_temps = []
-def workout_temp():
-    n = input("name of the template: ")
+
+def workout_temp(n):
+    exercises = []
     add = input("add exercise / finish: ")
     while add!="finish":
         exer = input("exercise: ")
         sets = input("number of sets: ")
-        wt_temp = {n: {"exercise": exer, "sets": sets}}
-    w_temps.append(wt_temp)
+        wt = {"exercise": exer, "sets": sets}
+        exercises.append(wt)
+        add = input("add exercise/finish: ")
+    data = load()
+    data["templates"][n]=exercises
+    save(data)
+    print("template ",n," is saved")
 
-personal_records()
+def view_temp(temp_name):
+    data = load()
+    return data["templates"].get(temp_name)
+
+def list_temps():
+    data = load()
+    for name in data["templates"]:
+        print(name)
+        exercises = data["templates"][name]
+    
 
 def menu():
     while True:
         print("\nGYM TRACKER")
+        print("0. Set up profile/edit profile")
         print("1. Add Workout")
         print("2. Make Workout - templates")
-        print("3. View Workout - templates")
-        print("4. BMI calculator")
-        print("5. Exit")
+        print("3. View Template")
+        print("4. View all workout templates list")
+        print("5. BMI calculator")
+        print("6. Exit")
 
         choice = input("Enter your choice: ")
 
-        if choice == "1":
-            new_workout()
-            break
+        if choice == "0":
+            personal_records()
+
+        elif choice == "1":
+            name = input("name of the workout: ")
+            new_workout(name)
 
         elif choice == "2":
-            workout_temp()
-            break
+            n = input("name of the new template to create: ")
+            workout_temp(n)
 
         elif choice == "3":
-            workout_temp()
-            break
-
+            temp_name = input("name of template to get: ")
+            view_temp(temp_name)
+        
         elif choice == "4":
-            bmi_cal(w, h)
-            break
+            temp_name = input("name of template to get: ")
+            list_temps()
 
         elif choice == "5":
+            bmi_cal()
+
+        elif choice == "6":
             print("Goodbye!")
             break
 

@@ -1,0 +1,23 @@
+{
+    "templates": {
+        "Legs": [
+            {
+                "exercise": "leg extension machine",
+                "sets": "3"
+            },
+            {
+                "exercise": "hamstring curls machine",
+                "sets": "3"
+            }
+        ]
+    },
+    "personal_records": {},
+    "history": [],
+    "profile": {
+        "Name": "Nikki",
+        "Weight": 57.0,
+        "Height": 1.7,
+        "Age": 19,
+        "Gender": "F"
+    }
+}
